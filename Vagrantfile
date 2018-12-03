@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
     export DEBIAN_FRONTEND=noninteractive
 
     apt-get install -y debootstrap xorriso grub-pc squashfs-tools
-    if [ ! -f /livecd/chroot/bin/sh]; then
+    if [ ! -f /livecd/chroot/bin/sh ]; then
       debootstrap --arch=amd64 --variant=minbase \
         --include=systemd,systemd-sysv,live-boot,linux-image-amd64,openssh-server,debootstrap,gdisk,dpkg-dev,linux-headers-$(uname -r),iproute2  \
         stretch /livecd/chroot http://deb.debian.org/debian
