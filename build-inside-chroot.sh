@@ -9,6 +9,5 @@ echo "deb http://deb.debian.org/debian stretch main contrib" >/etc/apt/sources.l
 export DEBIAN_FRONTEND=noninteractive
 apt update
 apt install -y live-boot linux-image-amd64 openssh-server debootstrap gdisk dpkg-dev linux-headers-$(uname -r) zfs-dkms
-modprobe zfs
 
 echo "PermitRootLogin yes" >>/etc/ssh/sshd_config

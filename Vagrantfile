@@ -1,21 +1,31 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "debian/stretch64"
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 2048
+    v.cpus = 2
+  end
   config.vm.provision "shell", inline: <<-SHELL
     set -ex
     apt-get update
     export DEBIAN_FRONTEND=noninteractive
-    apt-get install -y debootstrap xorriso grub-pc squashfs-tools
-    debootstrap --arch=amd64 --variant=minbase \
-      --include=systemd,systemd-sysv,live-boot,linux-image-amd64,openssh-server,debootstrap,gdisk,dpkg-dev,linux-headers-$(uname -r)  \
-      stretch /livecd/chroot http://deb.debian.org/debian
 
-    mkdir -p /livecd/chroot/root
-    cp /vagrant/build-inside-chroot.sh /livecd/chroot/root
-    chmod +x /livecd/chroot/root/build-inside-chroot.sh
-    mount --rbind /dev  /livecd/chroot/dev
-    mount --rbind /proc /livecd/chroot/proc
-    mount --rbind /sys  /livecd/chroot/sys
-    chroot /livecd/chroot /root/build-inside-chroot.sh
+    apt-get install -y debootstrap xorriso grub-pc squashfs-tools
+    if [ ! -f /livecd/chroot/bin/sh]; then
+      debootstrap --arch=amd64 --variant=minbase \
+        --include=systemd,systemd-sysv,live-boot,linux-image-amd64,openssh-server,debootstrap,gdisk,dpkg-dev,linux-headers-$(uname -r),iproute2  \
+        stretch /livecd/chroot http://deb.debian.org/debian
+
+      mkdir -p /livecd/chroot/root
+      cp /vagrant/build-inside-chroot.sh /livecd/chroot/root
+      chmod +x /livecd/chroot/root/build-inside-chroot.sh
+      mount --rbind /dev  /livecd/chroot/dev
+      mount --rbind /proc /livecd/chroot/proc
+      mount --rbind /sys  /livecd/chroot/sys
+      chroot /livecd/chroot /root/build-inside-chroot.sh
+      umount -lR /livecd/chroot/dev  || true
+      umount -lR /livecd/chroot/proc || true
+      umount -lR /livecd/chroot/sys  || true
+    fi
 
     mkdir -p /livecd/scratch /livecd/image/live
     mksquashfs /livecd/chroot /livecd/image/live/filesystem.squashfs -e boot
